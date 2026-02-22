@@ -36,12 +36,12 @@ export default function ClientPortal() {
   const fetchData = useCallback(async () => {
     if (!projectId) return
 
-    // Fetch project - try by ID, validate token
-    let query = supabase.from('projects').select('*').eq('id', projectId)
-    if (token) {
-      query = query.eq('magic_link_token', token)
-    }
-    const { data: proj, error: projErr } = await query.single()
+    // Fetch project - require both ID and magic link token
+    const { data: proj, error: projErr } = await supabase
+      .from('projects').select('*')
+      .eq('id', projectId)
+      .eq('magic_link_token', token)
+      .single()
 
     if (projErr || !proj) {
       setError('Project not found or invalid access link.')
