@@ -2,6 +2,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import {
   LayoutDashboard, FolderOpen, Settings, LogOut, Menu, X,
+  CalendarDays, CalendarCheck, Clock,
 } from 'lucide-react'
 import { useState } from 'react'
 import { getInitials } from '@/lib/utils'
@@ -9,6 +10,9 @@ import { getInitials } from '@/lib/utils'
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/projects', label: 'Projects', icon: FolderOpen },
+  { to: '/scheduling/event-types', label: 'Event Types', icon: CalendarDays },
+  { to: '/scheduling/bookings', label: 'Bookings', icon: CalendarCheck },
+  { to: '/scheduling/availability', label: 'Availability', icon: Clock },
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
 

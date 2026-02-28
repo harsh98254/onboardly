@@ -1,4 +1,4 @@
-import type { ProjectStatus, ProjectType, ChecklistItemType } from '@/types'
+import type { ProjectStatus, ProjectType, ChecklistItemType, BookingStatus, SchedulingType, LocationType } from '@/types'
 
 export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
   draft: 'Draft',
@@ -38,6 +38,57 @@ export const CHECKLIST_TYPE_LABELS: Record<ChecklistItemType, string> = {
   task: 'Task',
   approval: 'Approval',
 }
+
+// Scheduling constants
+export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
+  pending: 'Pending',
+  confirmed: 'Confirmed',
+  cancelled: 'Cancelled',
+  rescheduled: 'Rescheduled',
+  no_show: 'No Show',
+  completed: 'Completed',
+}
+
+export const BOOKING_STATUS_STYLES: Record<BookingStatus, { bg: string; text: string; dot: string }> = {
+  pending: { bg: 'bg-warning-50', text: 'text-warning-700', dot: 'bg-warning-500' },
+  confirmed: { bg: 'bg-success-50', text: 'text-success-700', dot: 'bg-success-500' },
+  cancelled: { bg: 'bg-gray-50', text: 'text-gray-500', dot: 'bg-gray-400' },
+  rescheduled: { bg: 'bg-primary-50', text: 'text-primary-700', dot: 'bg-primary-500' },
+  no_show: { bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500' },
+  completed: { bg: 'bg-success-50', text: 'text-success-700', dot: 'bg-success-500' },
+}
+
+export const SCHEDULING_TYPE_LABELS: Record<SchedulingType, string> = {
+  individual: 'One-on-One',
+  round_robin: 'Round Robin',
+  collective: 'Collective',
+}
+
+export const LOCATION_TYPE_LABELS: Record<LocationType, string> = {
+  google_meet: 'Google Meet',
+  zoom: 'Zoom',
+  phone: 'Phone Call',
+  in_person: 'In Person',
+  custom: 'Custom',
+  none: 'No Location',
+}
+
+export const DURATION_OPTIONS = [15, 20, 30, 45, 60, 90, 120]
+
+export const EVENT_TYPE_COLORS = [
+  '#6366f1', '#8b5cf6', '#ec4899', '#ef4444', '#f97316',
+  '#eab308', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6',
+]
+
+export const DAYS_OF_WEEK = [
+  { value: 0, label: 'Sunday', short: 'Sun' },
+  { value: 1, label: 'Monday', short: 'Mon' },
+  { value: 2, label: 'Tuesday', short: 'Tue' },
+  { value: 3, label: 'Wednesday', short: 'Wed' },
+  { value: 4, label: 'Thursday', short: 'Thu' },
+  { value: 5, label: 'Friday', short: 'Fri' },
+  { value: 6, label: 'Saturday', short: 'Sat' },
+]
 
 export const DEFAULT_CHECKLIST_ITEMS: Array<{ title: string; type: ChecklistItemType; description: string; config: Record<string, unknown> }> = [
   {

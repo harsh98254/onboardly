@@ -6,23 +6,36 @@ import { formatRelativeTime } from '@/lib/utils'
 import { STATUS_BADGE_STYLES, PROJECT_STATUS_LABELS } from '@/lib/constants'
 import type { Project } from '@/types'
 import { Plus, FolderOpen, Clock, Users, CheckCircle2, BarChart3 } from 'lucide-react'
+import type { Booking } from '@/types'
+import { formatSlotTime, formatSlotDate } from '@/lib/utils'
 
 export default function Dashboard() {
   const { user } = useAuth()
   const [projects, setProjects] = useState<Project[]>([])
+  const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!user) return
-    supabase
-      .from('projects')
-      .select('*')
-      .eq('designer_id', user.id)
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        setProjects(data ?? [])
-        setLoading(false)
-      })
+    Promise.all([
+      supabase
+        .from('projects')
+        .select('*')
+        .eq('designer_id', user.id)
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('bookings')
+        .select('*, event_type:event_types(id, title, slug, duration, color)')
+        .eq('host_id', user.id)
+        .in('status', ['confirmed', 'pending'])
+        .gte('start_time', new Date().toISOString())
+        .order('start_time', { ascending: true })
+        .limit(5),
+    ]).then(([projectsRes, bookingsRes]) => {
+      setProjects(projectsRes.data ?? [])
+      setUpcomingBookings(bookingsRes.data ?? [])
+      setLoading(false)
+    })
   }, [user])
 
   if (loading) {
@@ -61,7 +74,7 @@ export default function Dashboard() {
           { label: 'Onboarding', value: stats.onboarding, icon: Users, color: 'text-warning-600' },
           { label: 'Completed', value: stats.completed, icon: CheckCircle2, color: 'text-success-600' },
         ].map((stat) => (
-          <div key={stat.label} className="bg-white rounded-xl border border-gray-200 p-5">
+          <div key={stat.label} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-sm transition-shadow">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-500">{stat.label}</span>
               <stat.icon size={18} className={stat.color} />
@@ -70,6 +83,42 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+
+      {/* Upcoming Bookings */}
+      {upcomingBookings.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">Upcoming Bookings</h2>
+            <Link to="/scheduling/bookings" className="text-sm text-primary-600 hover:underline">View all</Link>
+          </div>
+          <div className="grid gap-3">
+            {upcomingBookings.map((booking) => {
+              const et = booking.event_type as { title: string; duration: number; color: string } | undefined
+              return (
+                <Link key={booking.id} to="/scheduling/bookings"
+                  className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md hover:scale-[1.01] transition-all duration-200 flex items-center gap-4">
+                  <div
+                    className="w-1 h-12 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: et?.color || '#6366f1' }}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{et?.title || 'Meeting'}</p>
+                    <p className="text-xs text-gray-500">{booking.invitee_name}</p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-sm font-medium text-gray-900">
+                      {formatSlotTime(booking.start_time)}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {formatSlotDate(booking.start_time)}
+                    </p>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Recent projects */}
       <div className="flex items-center justify-between mb-4">
@@ -93,7 +142,7 @@ export default function Dashboard() {
             const badge = STATUS_BADGE_STYLES[project.status]
             return (
               <Link key={project.id} to={`/projects/${project.id}`}
-                className="bg-white rounded-xl border border-gray-200 p-5 hover:border-primary-300 hover:shadow-sm transition-all">
+                className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md hover:scale-[1.01] transition-all duration-200">
                 <div className="flex items-start justify-between">
                   <div className="min-w-0 flex-1">
                     <h3 className="text-base font-semibold text-gray-900 truncate">{project.name}</h3>
